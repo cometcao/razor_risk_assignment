@@ -1,7 +1,7 @@
 # razor_risk_assignment
 
 Due to implied mutual confidential agreement, this file will not provide description of the task.
-
+dev environment: python 3.x with Eclipse
 
 1. project summary:
 TDD was employed during the implementation of this project. This python component implemented a simple URI parser (full description in uri_parser.py). Regex is used to match URI format and matching data are passed from regex capturing groups.
