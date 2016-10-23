@@ -3,13 +3,18 @@
 Created on 22 Oct 2016
 
 @author: MetalInvest
+
+Three type of unit tests defined:
+1. URI representation class tests
+2. URI parsing correctly with OK message
+3. URI parsing incorrectly with error message
+
 '''
 import unittest
 from uri_parser.uri_parser import UriParser
 from uri_parser.uri_parser_error import UriParserError
 from uri_parser.uri_parser_error import ReturnStatus
 from uri_parser.uri_rep import *
-
 
 
 class UriTest(unittest.TestCase):
@@ -38,11 +43,8 @@ class UriTest(unittest.TestCase):
         uri.addQuery(query)
         uri.addFragment(fragment)
         self.failUnless(str(uri) == "http://cometcao@www.google.com:8080/testpath?param=1#testFag")
- 
-    def testParseNone(self):
-        error, _ = self.parser.parse(None)
-        self.failUnless(error.status == ReturnStatus.Invalid_Input)
-         
+ ########################################################################
+
     def testParseURI(self):
         error, _ = self.parser.parse("abc://username:password@example.com:123/path/data?key=value&key2=value2#fragid1")
         self.failUnless(error.status == ReturnStatus.OK)
@@ -78,15 +80,22 @@ class UriTest(unittest.TestCase):
         self.failUnless(uri.getPathValue() == "ISSN:1535-3631")
         self.failUnless(uri.getQueryValue() == "")
         self.failUnless(uri.getFragmentValue() == "")
-
+############################################################
+    def testParseNone(self):
+        error, _ = self.parser.parse(None)
+        self.failUnless(error.status == ReturnStatus.Invalid_Input)
+         
     def testParseFalseUrl(self):
-        pass
+        error, _ = self.parser.parse("abc://username@password@example.com:123/path/data?key=value&key2=value2#fragid1")
+        self.failUnless(error.status == ReturnStatus.Invalid_Format)
     
     def testParseFalseFtp(self):
-        pass
+        error, _ = self.parser.parse("?abc://username:password@example.com:123/path/data?key=value&key2=value2#fragid1")
+        self.failUnless(error.status == ReturnStatus.Invalid_Format)
     
     def testParseFalseUrn(self):
-        pass
+        error, _ = self.parser.parse("urn//:ISSN:1535-3631")
+        self.failUnless(error.status == ReturnStatus.Invalid_Format)
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
