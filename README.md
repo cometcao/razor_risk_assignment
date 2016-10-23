@@ -4,7 +4,7 @@ Due to implied mutual confidential agreement, this file will not provide descrip
 
 
 1. project summary:
-This python component implemented a simple URI parser (full description in uri_parser.py). Regex is used to match URI format and matching data are passed from regex capturing groups.
+TDD was employed during the implementation of this project. This python component implemented a simple URI parser (full description in uri_parser.py). Regex is used to match URI format and matching data are passed from regex capturing groups.
 The data structure are described on the top of uri_rep.py file, and the uri_parser_error.py defines the parser return status. Unittests are defined in uri_parser_test.py
 Current solution have this draw-back of being unable to provide meaningful error message precisely to the element of the URI address
 
