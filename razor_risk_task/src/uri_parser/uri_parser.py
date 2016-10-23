@@ -9,6 +9,31 @@ The Regex of URI was taken from http://snipplr.com/view/6889/regular-expressions
 Many thanks to stackoverflow
 
 Regex debugged by using: https://www.debuggex.com/
+
+    ^
+    ([a-z][a-z0-9+.-]*):                                                             #1 scheme
+    (?:
+        \/\/                                                                         it has an authority:
+        
+        (                                                                            #2 authority
+            (?:(?=((?:[a-z0-9-._~!$&'()*+,;=:]|%[0-9A-F]{2})*))(\3)@)?               #4 userinfo
+            (?=(\[[0-9A-F:.]{2,}\]|(?:[a-z0-9-._~!$&'()*+,;=]|%[0-9A-F]{2})*))\5        #5 host 
+            (?::(?=(\d*))\6)?                                                        #6 port
+        )
+        
+        (\/(?=((?:[a-z0-9-._~!$&'()*+,;=:@\/]|%[0-9A-F]{2})*))\8)?                   #7 path
+    
+        |                                                                            it doesn't have an authority:
+        
+        (\/?(?!\/)(?=((?:[a-z0-9-._~!$&'()*+,;=:@\/]|%[0-9A-F]{2})*))\10)?           #9 path
+    )
+    (?:
+        \?(?=((?:[a-z0-9-._~!$&'()*+,;=:@\/?]|%[0-9A-F]{2})*))\11                    #11 query string
+    )?
+    (?:
+        \#(?=((?:[a-z0-9-._~!$&'()*+,;=:@\/?]|%[0-9A-F]{2})*))\12                    #12 fragment
+    )?
+    $
 '''
 
 from uri_parser_error import UriParserError
@@ -43,6 +68,9 @@ class UriParser(object):
         pass
     
     def parse(self, uri_input):
+        '''
+        The main parse method, return parse status and URI representation if successful
+        '''
         if uri_input:
             return self.parseUri(uri_input)
         else:
@@ -51,8 +79,9 @@ class UriParser(object):
     def parseUri(self, uri_input):
         pattern_match = UriParser.pattern.fullmatch(uri_input)
         if pattern_match:
-            #uri = self.constructURIcomponent(uri_input, pattern_match)
-            return UriParserError("All Good", ReturnStatus.OK), None
+            #self.displayMatchingGroups(pattern_match)
+            uri = self.constructURIcomponent(uri_input, pattern_match)
+            return UriParserError("All Good", ReturnStatus.OK), uri
         else:
             return UriParserError("Invalid format of input URI".format(uri_input), ReturnStatus.Invalid_Format), None
 
@@ -62,21 +91,30 @@ class UriParser(object):
         scheme = uri_scheme(pattern_match.group(1))
         uri.addScheme(scheme)
         
-        authority = uri_authority(pattern_match.group(2))
-        usr = uri_usr_info(pattern_match.group(4))
-        host = uri_host(pattern_match.group(5))
-        port = uri_port(pattern_match.group(6))
-        authority.addHost(host)
-        authority.addPort(port)
-        authority.addUserInfo(usr)
-        uri.addAuthority(authority)
+        if pattern_match.group(2):
+            authority = uri_authority(pattern_match.group(2))
+            usr = uri_usr_info(pattern_match.group(4))
+            host = uri_host(pattern_match.group(5))
+            port = uri_port(pattern_match.group(6))
+            authority.addHost(host)
+            authority.addPort(port)
+            authority.addUserInfo(usr)
+            uri.addAuthority(authority)
         
-        path = uri_path(pattern_match.group(7))
-        query = uri_query(pattern_match.group(11))
-        fragment = uri_query(pattern_match.group(12))
-        uri.addPath(path)
-        uri.addQuery(query)
-        uri.addFragment(fragment)
+        if pattern_match.group(7):
+            path = uri_path(pattern_match.group(7))
+            uri.addPath(path)
+        elif pattern_match.group(9):
+            path = uri_path(pattern_match.group(9))
+            uri.addPath(path)
+        
+        if pattern_match.group(11):
+            query = uri_query(pattern_match.group(11))
+            uri.addQuery(query)
+            
+        if pattern_match.group(12):
+            fragment = uri_fragment(pattern_match.group(12))
+            uri.addFragment(fragment)
         
         return uri
         
